@@ -1,0 +1,22 @@
+{
+  "name": "my-app",
+  "slug": "my-app",
+  "expo": {
+    "plugins": [
+      [
+        "expo-av",
+        {
+          "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone."
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "0734de34-55f7-4e5a-bc62-97b2d1be4407"
+      }
+    },
+    "android": {
+      "package": "com.aohota.myapp"
+    }
+  }
+}

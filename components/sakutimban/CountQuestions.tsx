@@ -1,5 +1,5 @@
-import React from 'react';
-import {View, Text, ViewStyle} from 'react-native';
+import React from "react";
+import { View, Text, ViewStyle } from "react-native";
 
 interface CountBadgeProps {
   current?: number;
@@ -10,17 +10,17 @@ interface CountBadgeProps {
   borderWidth?: number;
   fontSize?: number;
   fontWeight?:
-    | 'bold'
-    | 'normal'
-    | '100'
-    | '200'
-    | '300'
-    | '400'
-    | '500'
-    | '600'
-    | '700'
-    | '800'
-    | '900';
+    | "bold"
+    | "normal"
+    | "100"
+    | "200"
+    | "300"
+    | "400"
+    | "500"
+    | "600"
+    | "700"
+    | "800"
+    | "900";
   borderRadius?: number;
   paddingHorizontal?: number;
   paddingVertical?: number;
@@ -32,17 +32,15 @@ interface CountBadgeProps {
 const CountBadge: React.FC<CountBadgeProps> = ({
   current = 0,
   total = 0,
-  backgroundColor = '#4CAF50',
-  textColor = '#FFFFFF',
-  borderColor = '#FFD700',
-  borderWidth = 0,
+  backgroundColor = "#4CAF50",
+  textColor = "#112164",
   fontSize = 16,
-  fontWeight = 'bold',
+  fontWeight = "bold",
   borderRadius = 8,
   paddingHorizontal = 12,
   paddingVertical = 6,
   containerStyle = {},
-  separator = '/',
+  separator = "/",
   showBorder = true,
 }) => {
   const isCompleted = current >= total;
@@ -54,9 +52,9 @@ const CountBadge: React.FC<CountBadgeProps> = ({
       borderRadius,
       paddingHorizontal,
       paddingVertical,
-      alignItems: 'center',
-      justifyContent: 'center',
-      alignSelf: 'flex-start',
+      alignItems: "center",
+      justifyContent: "center",
+      alignSelf: "flex-start",
     };
 
     return {
@@ -66,7 +64,7 @@ const CountBadge: React.FC<CountBadgeProps> = ({
 
   return (
     <View style={[getBadgeStyle(), containerStyle]}>
-      <Text style={{fontSize, fontWeight}}>
+      <Text style={{ fontSize, fontWeight }}>
         {current}
         {separator}
         {total}

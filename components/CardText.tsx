@@ -1,27 +1,10 @@
-import React, { useState } from "react";
+import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 
 export const CardText = ({ text }: { text: string }) => {
-  const [textSize, setTextSize] = useState({ width: 0, height: 0 });
-
-  const handleTextLayout = (event) => {
-    const { width, height } = event.nativeEvent.layout;
-    setTextSize({ width, height });
-  };
-
   return (
-    <View
-      style={[
-        styles.card,
-        {
-          width: textSize.width,
-          height: textSize.height,
-        },
-      ]}
-    >
-      <Text style={styles.text} onLayout={handleTextLayout}>
-        {text}
-      </Text>
+    <View style={[styles.card]}>
+      <Text style={styles.text}>{text}</Text>
     </View>
   );
 };

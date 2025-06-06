@@ -1,7 +1,45 @@
-import React from "react";
-import { View, Text, StyleSheet, Image } from "react-native";
+import React, { useEffect, useRef } from "react";
+import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../../redux/store";
+import { setData } from "../../redux/slices/gameReducer";
 
-const HeadGame = ({ isShowSuggest = false }) => {
+const HeadGame = ({
+  isShowSuggest = false,
+  timeOut,
+  useSupport,
+}: {
+  isShowSuggest?: boolean;
+  timeOut: any;
+  useSupport?: any;
+}) => {
+  const { time, isRunTime } = useSelector((state: RootState) => state.Game);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    const handleCleanup = () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+    };
+
+    if (isRunTime) {
+      timerRef.current = setInterval(() => {
+        dispatch(setData({ stateName: "time", value: time - 1 }));
+      }, 1000);
+    } else {
+      handleCleanup();
+    }
+
+    if (time < 1) {
+      timeOut();
+      handleCleanup();
+    }
+
+    return handleCleanup;
+  }, [time, isRunTime, timeOut]);
+
   return (
     <View style={styles.container}>
       <View style={styles.gem}>
@@ -29,12 +67,12 @@ const HeadGame = ({ isShowSuggest = false }) => {
         </Text>
       </View>
       {isShowSuggest && (
-        <View style={styles.cup}>
+        <TouchableOpacity style={styles.cup} onPress={useSupport}>
           <Image source={require("../../assets/suggest.png")}></Image>
           <Text style={{ fontSize: 12, color: "white", fontWeight: "bold" }}>
             Gợi ý
           </Text>
-        </View>
+        </TouchableOpacity>
       )}
       <View style={styles.time}>
         <Image source={require("../../assets/lightning.png")}></Image>
@@ -46,7 +84,7 @@ const HeadGame = ({ isShowSuggest = false }) => {
             marginLeft: 5,
           }}
         >
-          610s
+          {time}s
         </Text>
       </View>
     </View>
@@ -82,7 +120,7 @@ const styles = StyleSheet.create({
   },
   time: {
     flexDirection: "row",
-    marginRight: 12,
+    marginRight: 2,
     width: 62,
     height: 25,
     borderRadius: 25,

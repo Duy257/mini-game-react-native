@@ -1,5 +1,5 @@
-import React, { useRef, useCallback } from "react";
-import { View, Text } from "react-native";
+import React, { useRef, useState, useCallback } from "react";
+import { View, TouchableOpacity, Text } from "react-native";
 
 const PositionInfo = () => {
   const wordsState = [
@@ -10,45 +10,61 @@ const PositionInfo = () => {
     { id: 5, text: "7" },
     { id: 6, text: "giờ" },
   ];
-  // Tạo ref object để lưu trữ ref của từng word
   const wordRefs = useRef({});
+  const [wordPositions, setWordPositions] = useState({});
 
-  // Hàm để đo vị trí của một word cụ thể
-  const measureWord = useCallback((wordId: number) => {
-    const ref = wordRefs.current[wordId];
-    if (ref) {
-      ref.measureInWindow(
-        (x: number, y: number, width: number, height: number) => {
-          console.log(`Word ${wordId} position:`, { x, y, width, height });
-        }
-      );
-    }
-  }, []);
-
-  // Hàm để đo vị trí tất cả words
   const measureAllWords = useCallback(() => {
+    const positions = {};
+    let measuredCount = 0;
+    const totalWords = wordsState.length;
+
     wordsState.forEach((word) => {
-      measureWord(word.id);
+      const ref = wordRefs.current[word.id];
+      if (ref) {
+        ref.measureInWindow((x, y, width, height) => {
+          positions[word.id] = { x, y, width, height };
+          measuredCount++;
+
+          // Khi đã đo xong tất cả, update state
+          if (measuredCount === totalWords) {
+            setWordPositions(positions);
+          }
+        });
+      }
     });
-  }, [wordsState, measureWord]);
+  }, [wordsState]);
 
   return (
-    <View style={{ flexDirection: "row" }}>
-      {wordsState.map((word) => (
-        <View
-          key={`word-container-${word.id}`}
-          ref={(ref) => {
-            if (ref) {
+    <View>
+      <TouchableOpacity onPress={measureAllWords} style={{ padding: 20 }}>
+        <Text>Đo vị trí tất cả từ</Text>
+      </TouchableOpacity>
+
+      <View style={{ flexDirection: "row" }}>
+        {wordsState.map((word) => (
+          <View
+            key={`word-container-${word.id}`}
+            ref={(ref) => {
               wordRefs.current[word.id] = ref;
-            } else {
-              delete wordRefs.current[word.id];
-            }
-          }}
-          style={{ marginHorizontal: 8 }}
-        >
-          <Text>{word.text}</Text>
+            }}
+            style={{ marginHorizontal: 8 }}
+          >
+            <Text>{word.text}</Text>
+          </View>
+        ))}
+      </View>
+
+      {/* Hiển thị positions để debug */}
+      {Object.keys(wordPositions).length > 0 && (
+        <View style={{ padding: 20 }}>
+          <Text>Positions:</Text>
+          {Object.entries(wordPositions).map(([id, pos]) => (
+            <Text key={id}>
+              Word {id}: x={pos.x.toFixed(0)}, y={pos.y.toFixed(0)}
+            </Text>
+          ))}
         </View>
-      ))}
+      )}
     </View>
   );
 };

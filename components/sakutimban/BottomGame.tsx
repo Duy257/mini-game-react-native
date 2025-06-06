@@ -1,7 +1,12 @@
 import React from "react";
-import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
+import { View, StyleSheet, Image, TouchableOpacity } from "react-native";
 
-export const BottomGame = ({ backGame, pauseGame, resetGame, volumeGame }) => {
+export const BottomGame = ({
+  backGame,
+  pauseGame,
+  resetGame,
+  volumeGame,
+}: any) => {
   return (
     <View style={styles.container}>
       <TouchableOpacity style={styles.back} onPress={backGame}>

@@ -19,15 +19,15 @@ import Animated, {
   withSpring,
   runOnJS,
 } from "react-native-reanimated";
-import { BottomGame } from "./MatchingGameTest/BottomGame";
-import HeadGame from "./MatchingGameTest/HeadGame";
-import LineProgressBar from "./MatchingGameTest/LineProgressBar";
-import Lives from "./MatchingGameTest/Lives";
-import CountBadge from "./MatchingGameTest/CountQuestions";
+import { BottomGame } from "../components/sakutimban/BottomGame";
+import HeadGame from "../components/sakutimban/HeadGame";
+import LineProgressBar from "../components/sakutimban/LineProgressBar";
+import Lives from "../components/sakutimban/Lives";
+import CountBadge from "../components/sakutimban/CountQuestions";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
-export const SentenceRearrangementGame = () => {
+export const SakuLuyenCong = () => {
   const [wordsInDropZone, setWordsInDropZone] = useState([]);
   const [isError, setIsError] = useState(false);
   const [availableWords, setAvailableWords] = useState([
@@ -169,6 +169,7 @@ export const SentenceRearrangementGame = () => {
         resizeMode="cover"
       >
         <View style={{ flex: 1, marginVertical: 16, marginHorizontal: 12 }}>
+          {/* Header */}
           <HeadGame />
           <LineProgressBar progress={50}></LineProgressBar>
           <View
@@ -183,6 +184,8 @@ export const SentenceRearrangementGame = () => {
             <Lives></Lives>
             <CountBadge current={7} total={15}></CountBadge>
           </View>
+
+          {/* title question */}
           <View style={styles.header}>
             <View style={styles.instruction}>
               <Text style={styles.wordText}>🔊 Tôi ăn sáng lúc 7 giờ</Text>

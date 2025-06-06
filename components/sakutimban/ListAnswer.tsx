@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 
 import {
   View,
@@ -10,12 +10,13 @@ import {
 } from "react-native";
 import Animated, {
   Layout,
-  runOnJS,
   useAnimatedStyle,
   useSharedValue,
-  withTiming,
 } from "react-native-reanimated";
 import { Audio } from "expo-av";
+import { useSelector } from "react-redux";
+import { Item, setData } from "../../redux/slices/MatchingGameSlice";
+import { useDispatch } from "react-redux";
 
 export const playSound = async (url: string) => {
   await Audio.setAudioModeAsync({ playsInSilentModeIOS: true });
@@ -27,115 +28,23 @@ export const playSound = async (url: string) => {
   return soundObject.sound;
 };
 
-interface Item {
-  id: string;
-  text: string;
-  matchId: string;
-  type: "audio" | "image" | "text";
-}
-interface ItemDone {
-  listItems: Item[];
-}
-
-function shuffleArray(array: Item[]) {
-  for (let i = array.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
-  }
-  return array;
-}
-
-const itemsLeft: Item[] = [
-  {
-    id: "l1",
-    text: "Compare",
-    matchId: "m1",
-    type: "text",
-  },
-  {
-    id: "l2",
-    text: "Market",
-    matchId: "m2",
-    type: "text",
-  },
-  {
-    id: "l3",
-    text: "Promise",
-    matchId: "m3",
-    type: "text",
-  },
-  {
-    id: "l4",
-    text: "Dog",
-    matchId: "m4",
-    type: "text",
-  },
-  {
-    id: "l5",
-    text: "Warning",
-    matchId: "m5",
-    type: "text",
-  },
-];
-const itemsRight: Item[] = [
-  {
-    id: "r1",
-    text: "So sánh",
-    matchId: "m1",
-    type: "text",
-  },
-  {
-    id: "r2",
-    text: "https://api.dictionaryapi.dev/media/pronunciations/en/market-us.mp3",
-    matchId: "m2",
-    type: "audio",
-  },
-  {
-    id: "r3",
-    text: "https://api.dictionaryapi.dev/media/pronunciations/en/promise-us.mp3",
-    matchId: "m3",
-    type: "audio",
-  },
-  {
-    id: "r4",
-    text: "https://cdn.shopify.com/s/files/1/0086/0795/7054/files/Golden-Retriever.jpg?v=1645179525",
-    matchId: "m4",
-    type: "image",
-  },
-  {
-    id: "r5",
-    text: "Cảnh báo",
-    matchId: "m5",
-    type: "text",
-  },
-];
-
 const ListAnswer = () => {
-  const [listItemsLeft, setListItemsLeft] = useState<Item[]>([]);
-  const [listItemsRight, setListItemsRight] = useState<Item[]>([]);
-  const [selectedLeft, setSelectedLeft] = useState<Item | null>(null);
-  const [matchedPairs, setMatchedPairs] = useState<string[]>([]);
-  const [errorPairs, setErrorPairs] = useState<string[]>([]);
-  const [selectedRight, setSelectedRight] = useState<Item | null>(null);
-  const [listItemsDone, setListItemsDone] = useState<ItemDone[]>([]);
-
-  useEffect(() => {
-    setListItemsLeft(shuffleArray(itemsLeft));
-    setListItemsRight(shuffleArray(itemsRight));
-  }, []);
-
-  const isSelected = (item: Item, side: string) => {
-    if (side === "left") {
-      return selectedLeft?.id === item.id;
-    } else {
-      return selectedRight?.id === item.id;
-    }
-  };
+  const dispatch = useDispatch();
+  const {
+    listItemsLeft,
+    listItemsRight,
+    selectedLeft,
+    selectedRight,
+    matchedPairs,
+    errorPairs,
+    questionDone,
+    listItemsDone,
+  } = useSelector((state: any) => state.MatchingGame);
 
   const handleLeftSelect = (item: Item) => {
     if (matchedPairs.includes(item.id)) return;
 
-    setSelectedLeft(item);
+    dispatch(setData({ stateName: "selectedLeft", value: item }));
     if (selectedRight) {
       checkMatch(item, selectedRight);
     }
@@ -146,7 +55,7 @@ const ListAnswer = () => {
       playSound(item.text);
     }
 
-    setSelectedRight(item);
+    dispatch(setData({ stateName: "selectedRight", value: item }));
     if (selectedLeft) {
       checkMatch(selectedLeft, item);
     }
@@ -162,46 +71,66 @@ const ListAnswer = () => {
   const checkMatch = (leftItem: Item, rightItem: Item) => {
     if (leftItem.matchId === rightItem.matchId) {
       // Correct match
-      setMatchedPairs([...matchedPairs, leftItem.id, rightItem.id]);
+      dispatch(
+        setData({
+          stateName: "matchedPairs",
+          value: [...matchedPairs, leftItem.id, rightItem.id],
+        })
+      );
       setTimeout(() => {
         deleteItemLeft(leftItem.id);
         deleteItemRight(rightItem.id);
-        setListItemsDone((prev) => [
-          ...prev,
-          { listItems: [leftItem, rightItem] },
-        ]);
+        dispatch(
+          setData({
+            stateName: "listItemsDone",
+            value: [...listItemsDone, { listItems: [leftItem, rightItem] }],
+          })
+        );
+        dispatch(
+          setData({ stateName: "questionDone", value: questionDone + 1 })
+        );
       }, 1000);
     } else {
-      setErrorPairs([...errorPairs, leftItem.id, rightItem.id]);
+      dispatch(
+        setData({
+          stateName: "errorPairs",
+          value: [...errorPairs, leftItem.id, rightItem.id],
+        })
+      );
     }
     setTimeout(() => {
-      setSelectedLeft(null);
-      setSelectedRight(null);
-      setErrorPairs([]);
+      dispatch(setData({ stateName: "selectedLeft", value: null }));
+      dispatch(setData({ stateName: "selectedRight", value: null }));
+      dispatch(setData({ stateName: "errorPairs", value: [] }));
     }, 500);
   };
 
   const deleteItemLeft = (id: string) => {
-    setListItemsLeft((prev) => prev.filter((item) => item.id !== id));
+    dispatch(
+      setData({
+        stateName: "listItemsLeft",
+        value: listItemsLeft.filter((item: { id: string }) => item.id !== id),
+      })
+    );
   };
 
   const deleteItemRight = (id: string) => {
-    setListItemsRight((prev) => prev.filter((item) => item.id !== id));
+    dispatch(
+      setData({
+        stateName: "listItemsRight",
+        value: listItemsRight.filter((item: { id: string }) => item.id !== id),
+      })
+    );
+  };
+
+  const isSelected = (item: Item, side: string) => {
+    if (side === "left") return selectedLeft?.id === item.id;
+    else return selectedRight?.id === item.id;
   };
 
   const AnimatedItem = ({ item, onSelected, side }) => {
     const opacity = useSharedValue(1);
     const height = useSharedValue(65);
-    // const handleDelete = (item: Item, side: string) => {
-    //   opacity.value = withTiming(0, { duration: 300 });
-    //   height.value = withTiming(0, { duration: 400 }, () => {
-    //     if (side === "left") {
-    //       deleteItemLeft(item.id);
-    //     } else {
-    //       deleteItemRight(item.id);
-    //     }
-    //   });
-    // };
     const animatedStyle = useAnimatedStyle(() => ({
       opacity: opacity.value,
       height: height.value,
